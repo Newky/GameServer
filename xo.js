@@ -34,7 +34,14 @@ Manager.prototype.requestMove = function(game_id, options) {
 	}
 };
 
-
+Manager.prototype.requestBoard = function(game_id) {
+	try {
+		return this.games[game_id].getBoard();
+	}catch(e) {
+		console.log("Invalid Game Id");
+		return 0;
+	}
+};
 
 function Game(board, turn) {
 	var args = Array.prototype.slice.apply(arguments, [2]);
@@ -67,11 +74,17 @@ function Game(board, turn) {
 		var game_status = this.board.over();
 		if(game_status == -1)
 			return null;
+		if(game_status == 2)
+			return "Drawn Game";
 		return this.players[game_status];
 	};
 
 	this.printBoard = function() {
 		this.board.printBoard();
+	};
+
+	this.getBoard = function() {
+		return this.board.getBoard();
 	};
 
 	this.isValidBoard = function() {
@@ -93,21 +106,27 @@ function Board(starting) {
 			"1": "X",
 			"-1": "-"
 		};
-
-		/*starting.forEach(function(x) {*/
-		/*x.forEach(function(y) {*/
-		/*console.log(markers[y]+"\t");*/
-		/*})*/
-		/*console.log("\n");*/
-		/*});*/
-
 		for(var i=0;i<starting.length;i++) {
 			for(var j=0;j<starting[i].length;j++) {
 				console.log(markers[starting[i][j]] + ""); 
 			}
 			console.log("\n");
 		}
-
+	};
+	this.getBoard= function() {
+		var markers = {
+			"0": "O",
+			"1": "X",
+			"-1": "-"
+		};
+		var result = new Array(3);
+		for(var i=0;i<3;i++) {
+			result[i] = new Array(3);
+			for(var j=0;j<3;j++) {
+				result[i][j] = markers[starting[i][j]];
+			}
+		}
+		return result;
 	};
 
 	this.isValidBoard = function() {
@@ -166,7 +185,16 @@ function Board(starting) {
 		temp = [starting[2][0], starting[1][1], starting[0][2]];
 		result = match(temp);
 		if (result != -1) return result;
-		return -1;
+
+		//Is it a draw
+		for(var i=0;i<3;i++) {
+			temp = starting[i];
+			for(var j=0;j<3;j++)
+				if(temp[j] == -1)
+					return temp[j];
+		}
+		//Its a Draw
+		return 2;
 	};
 };
 
