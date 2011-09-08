@@ -1,3 +1,41 @@
+var sha1_hash = require("./hash.js").sha1_hash;
+
+function Manager() {
+	this.games = {};
+
+}
+
+Manager.prototype.addGame = function(player1, player2, board) {
+	var hash = sha1_hash(player1+player2);
+	board = board || null;
+	//Game Doesn't exist
+	if(typeof this.games[hash] === "undefined"){
+		this.games[hash] = new Game(board, 0, player1, player2);
+		return hash;
+	}else {
+		console.log("Game Exists");
+		return hash;
+	}
+};
+
+Manager.prototype.requestMove = function(game_id, options) {
+	try {
+		this.games[game_id].move(options);
+		var over = this.games[game_id].over()
+		if( over !== null) {
+			delete this.games[game_id];
+			return over;
+		}else{
+			return 1;
+		}
+	}catch(e) {
+		console.log("Invalid Move, Ignoring");
+		return 0;
+	}
+};
+
+
+
 function Game(board, turn) {
 	var args = Array.prototype.slice.apply(arguments, [2]);
 	var name0 = args[0] || "Player 1";
@@ -10,7 +48,9 @@ function Game(board, turn) {
 		1: name1
 	};
 
-	this.move = function(x, y) {
+	this.move = function(options) {
+		var x = options.x;
+		var y = options.y;
 		if(this.board.isValidMove(x, y)){
 			this.board.makeMove(x, y, this.turn);
 			this.turn = (this.turn == 0) ? 1: 0 ;
@@ -37,10 +77,6 @@ function Game(board, turn) {
 	this.isValidBoard = function() {
 		return this.board.isValidBoard();
 	}
-};
-
-function Player(name) {
-	
 };
 
 function Board(starting) {
@@ -134,4 +170,4 @@ function Board(starting) {
 	};
 };
 
-exports.Game = Game;
+exports.Manager = Manager;
