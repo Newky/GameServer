@@ -4,49 +4,32 @@ var assert = require("assert");
 var gamesmaster = new Manager();
 
 var game_id = gamesmaster.addGame("a", "bc");
-
+//Test Hash Function
 assert.ok(game_id == "a9993e364706816aba3e25717850c26c9cd0d89d", "Hash function not working");
+//Test Valid Move
+assert.ok(gamesmaster.requestMove(game_id, {x:0,y:0}) == 1, "Valid Moves Break it");
+//Test Invalid Move
+assert.ok(gamesmaster.requestMove(game_id, {x:0,y:0}) == 0, "Invalid Moves Break it");
+//Do some moves and win game
+gamesmaster.requestMove(game_id, {x:0, y:1});
+gamesmaster.requestMove(game_id, {x:1, y:1});
+gamesmaster.requestMove(game_id, {x:2, y:1});
 
-/*var instance = new Game();*/
+//Match Win Works
+assert.ok(gamesmaster.requestMove(game_id, {x:2,y:2}) === "a", "GameOver DoesntWork");
 
-/*instance.move(1,1);*/
-/*instance.move(0,1);*/
-/*instance.move(0,0);*/
-/*instance.move(1, 0);*/
-/*instance.move(2,2);*/
-/*assert.ok(instance.whosTurn() === "Player 1", "Turn Logic Not Working");*/
+var game_id = gamesmaster.addGame("Test1", "Test2");
 
+gamesmaster.requestMove(game_id, {x:0, y:0}); //0
+gamesmaster.requestMove(game_id, {x:0, y:1}); //X
+gamesmaster.requestMove(game_id, {x:1, y:2}); //0
+gamesmaster.requestMove(game_id, {x:1, y:1}); //X
+gamesmaster.requestMove(game_id, {x:2, y:1}); //O
+gamesmaster.requestMove(game_id, {x:2, y:2}); //X
+gamesmaster.requestMove(game_id, {x:2, y:0}); //0
+gamesmaster.requestMove(game_id, {x:1, y:0}); //X
 
+assert.ok(gamesmaster.requestBoard(game_id).toString() === ([["O","X","-"],["X","X","O"],["O","O","X"]]).toString(), "get Board Doesnt Work");
 
-/*assert.ok(instance.over() === "Player 1", "Basic Who Won Doesn't Work");*/
+assert.ok(gamesmaster.requestMove(game_id, {x:0, y:2}) === "DrawnGame", "Draw Doesn't Work");
 
-/*var instance2 = new Game( [ [ 0, -1, 0 ], [1, -1, -1] , [1, -1, -1] ], 0 );*/
-
-/*instance2.move(0, 1);*/
-/*assert.ok(instance2.over() === "Player 1", "ReInit Board Doesn't Work");*/
-
-/*var instance3 = new Game( [ [0, 0, 0], [1, -1, -1], [-1, -1, -1] ]);*/
-
-/*assert.ok(!instance3.isValidBoard(), "InvalidBoardError doesnt work");*/
-
-/*
-Responses:
-
-/start?board=0,0,0,-1,-1,-1,1,1,1
-or
-/start?board=0,0,0,-1,-1,-1,1,1,1&Player1=Richy&Player2=Daphne
-{
-valid: 1,
-turn: 0,
-game_id : aaaaaaa,
-over: 0
-}
-
-/move?x=0&y=1&game_id=aaaaaaa
-
-{
-		valid:1,
-		turn:1,
-		board: 
-}
-*/
