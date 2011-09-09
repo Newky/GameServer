@@ -11,7 +11,7 @@ For these example I'll use curl but any application which handles post requests 
 
 ### Initialise Game
 
-   curl -d 'player1=richy&player2=testplayer' http://serveraddress:wherenoderesides/
+    curl -d 'player1=richy&player2=testplayer' http://serveraddress:wherenoderesides/
 
 The server then spits out some json with a game_id:
 
@@ -34,7 +34,7 @@ This will return some similar json with game_id again and the status of the oper
 
 To check what the board looks like at any stage we do the following
 
-   url -d 'game_id=5090d29b62366c00a2e261cae5f1f344fa199670' http://serveraddress:wherenoderesides/
+    curl -d 'game_id=5090d29b62366c00a2e261cae5f1f344fa199670' http://serveraddress:wherenoderesides/
 
 ### On Game End
 
