@@ -1,5 +1,5 @@
 var express = require("express");
-var Manager = require("./xo.js").Manager;
+var Manager = require("./manager.js").Manager;
 
 var gamesmaster = new Manager();
 var app = express.createServer();
@@ -36,6 +36,19 @@ app.post("/", function(req, res) {
 							winner: winner		
 						}
 						) + "\n");
+			}else if(params.game_id && params.wish) {
+				if(params.wish === "last") {
+					var last = gamesmaster.requestLastMove(params.game_id);
+					if(last === null) {
+						res.send(JSON.stringify(
+									{
+										status: "No Last Move"
+									}
+								       ) + "\n");
+					}else{
+						res.send(JSON.stringify(last) + "\n");
+					}
+				}
 			}else if(params.game_id) {
 				var board = gamesmaster.requestBoard(params.game_id);
 				res.send(JSON.stringify(

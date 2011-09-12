@@ -1,49 +1,4 @@
-var sha1_hash = require("./hash.js").sha1_hash;
-
-function Manager() {
-	this.games = {};
-
-}
-
-Manager.prototype.addGame = function(player1, player2, board) {
-	var hash = sha1_hash(player1+player2);
-	board = board || null;
-	//Game Doesn't exist
-	if(typeof this.games[hash] === "undefined"){
-		this.games[hash] = new Game(board, 0, player1, player2);
-		return hash;
-	}else {
-		console.log("Game Exists");
-		return hash;
-	}
-};
-
-Manager.prototype.requestMove = function(game_id, options) {
-	try {
-		this.games[game_id].move(options);
-		var over = this.games[game_id].over()
-		if( over !== null) {
-			delete this.games[game_id];
-			return over;
-		}else{
-			return 1;
-		}
-	}catch(e) {
-		console.log("Invalid Move, Ignoring");
-		return 0;
-	}
-};
-
-Manager.prototype.requestBoard = function(game_id) {
-	try {
-		return this.games[game_id].getBoard();
-	}catch(e) {
-		console.log("Invalid Game Id");
-		return 0;
-	}
-};
-
-function Game(board, turn) {
+function xo(board, turn) {
 	var args = Array.prototype.slice.apply(arguments, [2]);
 	var name0 = args[0] || "Player 1";
 	var name1 = args[1] || "Player 2";
@@ -75,7 +30,7 @@ function Game(board, turn) {
 		if(game_status == -1)
 			return null;
 		if(game_status == 2)
-			return "Drawn Game";
+			return "DrawnGame";
 		return this.players[game_status];
 	};
 
@@ -90,6 +45,15 @@ function Game(board, turn) {
 	this.isValidBoard = function() {
 		return this.board.isValidBoard();
 	}
+
+	this.getLastMove = function() {
+		var last_move =  this.board.getLastMove();
+		if(last_move === null)
+			return last_move;
+		var last_turn = (this.turn == 0) ? 1: 0 ;
+		last_move.player = this.players[last_turn];
+		return last_move;
+	}
 };
 
 function Board(starting) {
@@ -99,6 +63,7 @@ function Board(starting) {
 		[ -1 , -1, -1 ],
 		[ -1 , -1, -1 ]
 			];
+	this.moves = [];
 
 	this.printBoard = function() {
 		var markers = {
@@ -113,6 +78,7 @@ function Board(starting) {
 			console.log("\n");
 		}
 	};
+
 	this.getBoard= function() {
 		var markers = {
 			"0": "O",
@@ -142,12 +108,23 @@ function Board(starting) {
 		return (Math.abs(count[0] - count[1]) <= 1)
 	};
 
+	this.getLastMove = function( ) {
+		if(this.moves.length >0)
+			return this.moves[this.moves.length-1];
+		else
+			return null;
+	};
+
 
 	this.isValidMove = function( x, y ) {
 		return ( starting[x][y] == -1);
 	};
 
 	this.makeMove = function( x, y, marker ) {
+		this.moves.push({
+					x: x,
+					y: y
+				});
 		starting[x][y] = marker;
 	};
 
@@ -198,4 +175,4 @@ function Board(starting) {
 	};
 };
 
-exports.Manager = Manager;
+exports.xo = xo;
