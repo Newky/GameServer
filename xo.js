@@ -11,15 +11,33 @@ function xo(board, turn) {
 	};
 
 	this.move = function(options) {
-		var x = options.x;
-		var y = options.y;
-		if(this.board.isValidMove(x, y)){
-			this.board.makeMove(x, y, this.turn);
-			this.turn = (this.turn == 0) ? 1: 0 ;
-		}else{
-			throw "InvalidMoveError";
+		if(options && options.x !== null && options.y !== null) {
+			var x = options.x;
+			var y = options.y;
+			if(this.board.isValidMove(x, y)){
+				this.board.makeMove(x, y, this.turn);
+				this.turn = (this.turn == 0) ? 1: 0 ;
+				return 1;
+			}else{
+				throw "InvalidMoveError";
+			}
+		}else {
+			throw "Insufficient Arguments for movement";
 		}
 	};
+
+	this.setBoard = function(board) {
+		this.board = new Board(board);
+		return 1;
+	};
+
+	this.getState = function() {
+		return {
+			board: JSON.stringify(this.board.getBoard()),
+			turn: this.turn,
+			status: this.over()
+		};	
+	}
 
 	this.whosTurn = function() {
 		return this.players[this.turn];
@@ -28,10 +46,10 @@ function xo(board, turn) {
 	this.over = function() {
 		var game_status = this.board.over();
 		if(game_status == -1)
-			return null;
+			return "Running";
 		if(game_status == 2)
 			return "DrawnGame";
-		return this.players[game_status];
+		return "Won By "+this.players[game_status];
 	};
 
 	this.printBoard = function() {
@@ -63,6 +81,8 @@ function Board(starting) {
 		[ -1 , -1, -1 ],
 		[ -1 , -1, -1 ]
 			];
+
+
 	this.moves = [];
 
 	this.printBoard = function() {
@@ -117,7 +137,7 @@ function Board(starting) {
 
 
 	this.isValidMove = function( x, y ) {
-		return ( starting[x][y] == -1);
+		return (this.over() === -this.over() === -11 && starting[x][y] == -1);
 	};
 
 	this.makeMove = function( x, y, marker ) {

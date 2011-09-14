@@ -3,7 +3,9 @@ var xo = require("./xo.js").xo;
 
 function Manager() {
 	this.games = {};
+
 	this.types = {
+		"xo": xo
 	};
 }
 
@@ -20,18 +22,17 @@ Manager.prototype.addType = function(label, obj) {
 	this.types[label] = obj;
 };
 
-Manager.prototype.addGame = function(player1, player2, game, board) {
+Manager.prototype.addGame = function(player1, player2, game) {
 	var hash = sha1_hash(player1+player2);
-	board = board || null;
-	//Game Doesn't exist
-	if (! game) {
+
+	if (!game) {
 		throw "NoGameSpecified";
 	}
 	if(typeof this.types[game] === "undefined") {
 		throw "NoSuchGame";
 	}else {
 		if(typeof this.games[hash] === "undefined"){
-			this.games[hash] = new this.types[game](board, 0, player1, player2);
+			this.games[hash] = new this.types[game](null, 0, player1, player2);
 			return hash;
 		}else {
 			console.log("Game Exists");
@@ -40,36 +41,39 @@ Manager.prototype.addGame = function(player1, player2, game, board) {
 	}
 };
 
-Manager.prototype.requestMove = function(game_id, options) {
-	try {
-		this.games[game_id].move(options);
-		var over = this.games[game_id].over()
-		if( over !== null) {
-			delete this.games[game_id];
-			return over;
-		}else{
-			return 1;
+Manager.prototype.changeBoard = function(game_id, board) {
+	if(game_id && board) {
+		try {
+			return this.games[game_id].setBoard(board)
+		}catch (e) {
+			throw "Error in games set Board"
 		}
-	}catch(e) {
-		/*console.log("Invalid Move, Ignoring");*/
-		return 0;
+	}else {
+		throw "Error in Change Board"
 	}
-};
+}
 
-Manager.prototype.requestBoard = function(game_id) {
-	try {
-		return this.games[game_id].getBoard();
-	}catch(e) {
-		console.log("Invalid Game Id");
-		return 0;
+Manager.prototype.getState = function(game_id) {
+	if(game_id) {
+		try {
+			return this.games[game_id].getState();
+		}catch(e){
+			throw "Error getting state"
+		}
+	}else {
+		throw "No Game id given in getState"
 	}
-};
+}
 
-Manager.prototype.requestLastMove = function(game_id) {
-	try{
-		return   this.games[game_id].getLastMove();
-	}catch(e) {
-		console.log("Invalid Game Id");
+Manager.prototype.requestMove = function(game_id, options) {
+	if(game_id && options) {
+		try {
+			return this.games[game_id].move(options);
+		}catch(e) {
+			console.log(e);
+			return 0;
+		}
+	}else{
 		return 0;
 	}
 };
