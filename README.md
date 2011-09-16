@@ -13,36 +13,40 @@ It currently supports the following:
 Each game file must create a game object (can be named anything you like) with the following defined:
 
 Constructor
+
 @params
-    board - *a representation of the board in array form*
-    turn - *a single integer value stating who has the starting turn, 0(player1), 1(player2)*
-    player1 - Player 1's name
-    player2 (optional) - Player 2's name(if null will presume its a one player game)
+    *board - *a representation of the board in array form*
+    *turn - *a single integer value stating who has the starting turn, 0(player1), 1(player2)*
+    *player1 - Player 1's name
+    *player2 (optional) - Player 2's name(if null will presume its a one player game)
 
 setBoard - a function to change the boards contents
+
 @params
-    board - *a representation of the board in array form*
+    *board - *a representation of the board in array form*
 
 getState - a function to return the state of the board in the appropriate format
+
 @params
-    none
+    *none
 
 output:
-    a json object with the following fields
-         board: json representation of the board
-         turn: who's turn it is, (0 or 1)
-         status: A line which reveals the game's state
+    *a json object with the following fields
+         *board: json representation of the board
+         *turn: who's turn it is, (0 or 1)
+         *status: A line which reveals the game's state
 
 requestMove - a function which the client can affect the internal state of the game
+
 **note**: This is quite a dangerous function, the user can pass anything in as options and this must be vetted by the game logic. It also must be
 parsed using the game logic. This may change, I have to think about it.
 
 @params
-	gameid - the current games hash to uniquely identify it
-	options - this is a json object which can be parsed by JSON.parse
+	*gameid - the current games hash to uniquely identify it
+	*options - this is a json object which can be parsed by JSON.parse
 
 output:
-	In the default return json object the returncode will be 1 on valid move
+	*In the default return json object the returncode will be 1 on valid move
 	any error messages will be logged in message.
 
 Example game using the server
@@ -69,11 +73,11 @@ This will return a json object:
 
 Perhaps we want to set up the board so that it we are midway through a game
 
-   curl -d 'game_id=a04fccfeb23e3f28140e8f96b8114de0da732691&board=[["1", "1", "-1"], ["0", "0", "-1"] , ["1", "0", "-1"]]' http://server:port/change
+    curl -d 'game_id=a04fccfeb23e3f28140e8f96b8114de0da732691&board=[["1", "1", "-1"], ["0", "0", "-1"] , ["1", "0", "-1"]]' http://server:port/change
 
 Responds with a json object
 
-   {"game_id":"a04fccfeb23e3f28140e8f96b8114de0da732691","status_code":1,"message":"Board change successful"}
+    {"game_id":"a04fccfeb23e3f28140e8f96b8114de0da732691","status_code":1,"message":"Board change successful"}
 
 ### Getting the state of the game
 
@@ -83,7 +87,7 @@ This will be different depending on the game logic you are modelling but let me 
 
 Responds with the default return json object along with some other valuable additions
 
-   {"game_id":"a04fccfeb23e3f28140e8f96b8114de0da732691","status_code":1,"message":"Retrieved state.","state":{"board":"[[\"X\",\"X\",\"-\"],[\"O\",\"O\",\"-\"],[\"X\",\"O\",\"-\"]]","turn":0,"status":"Running"}}
+    {"game_id":"a04fccfeb23e3f28140e8f96b8114de0da732691","status_code":1,"message":"Retrieved state.","state":{"board":"[[\"X\",\"X\",\"-\"],[\"O\",\"O\",\"-\"],[\"X\",\"O\",\"-\"]]","turn":0,"status":"Running"}}
 
 ### Making a move
 
