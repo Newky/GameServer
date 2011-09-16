@@ -137,7 +137,7 @@ function Board(starting) {
 
 
 	this.isValidMove = function( x, y ) {
-		return (this.over() === -this.over() === -11 && starting[x][y] == -1);
+		return (this.over() === -1 && starting[x][y] == -1);
 	};
 
 	this.makeMove = function( x, y, marker ) {
