@@ -19,7 +19,7 @@ Constructor
      * turn - *a single integer value stating who has the starting turn, 0(player1), 1(player2)*
      * player1 - Player 1's name
      * player2 (optional) - Player 2's name(if null will presume its a one player game)
-
+    
 setBoard - a function to change the boards contents
 
 @params
@@ -31,10 +31,10 @@ getState - a function to return the state of the board in the appropriate format
     * none
 
 output:
-* a json object with the following fields
-* board: json representation of the board
-* turn: who's turn it is, (0 or 1)
-* status: A line which reveals the game's state
+    * a json object with the following fields
+    * board: json representation of the board
+    * turn: who's turn it is, (0 or 1)
+    * status: A line which reveals the game's state
 
 requestMove - a function which the client can affect the internal state of the game
 
