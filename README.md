@@ -12,41 +12,47 @@ It currently supports the following:
 
 Each game file must create a game object (can be named anything you like) with the following defined:
 
-Constructor
+### Constructor
 
 @params
-     * board - *a representation of the board in array form*
-     * turn - *a single integer value stating who has the starting turn, 0(player1), 1(player2)*
-     * player1 - Player 1's name
-     * player2 (optional) - Player 2's name(if null will presume its a one player game)
+
+ - board - *a representation of the board in array form*
+ - turn - *a single integer value stating who has the starting turn, 0(player1), 1(player2)*
+ - player1 - Player 1's name
+ - player2 (optional) - Player 2's name(if null will presume its a one player game)
     
-setBoard - a function to change the boards contents
+### setBoard - a function to change the boards contents
 
 @params
-    * board - *a representation of the board in array form*
 
-getState - a function to return the state of the board in the appropriate format
+ - board - *a representation of the board in array form*
+
+### getState - a function to return the state of the board in the appropriate format
 
 @params
-    * none
+
+ * none
 
 output:
-    * a json object with the following fields
-    * board: json representation of the board
-    * turn: who's turn it is, (0 or 1)
-    * status: A line which reveals the game's state
 
-requestMove - a function which the client can affect the internal state of the game
+ * a json object with the following fields
+ * board: json representation of the board
+ * turn: who's turn it is, (0 or 1)
+ * status: A line which reveals the game's state
+
+### requestMove - a function which the client can affect the internal state of the game
 
 **note**: This is quite a dangerous function, the user can pass anything in as options and this must be vetted by the game logic. It also must be
 parsed using the game logic. This may change, I have to think about it.
 
 @params
-	* gameid - the current games hash to uniquely identify it
-	* options - this is a json object which can be parsed by JSON.parse
+
+ * gameid - the current games hash to uniquely identify it
+ * options - this is a json object which can be parsed by JSON.parse
           
 output:   
-	* In the default return json object the returncode will be 1 on valid move any error messages will be logged in message.
+
+ * In the default return json object the returncode will be 1 on valid move any error messages will be logged in message.
 
 Example game using the server
 =============================
