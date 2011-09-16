@@ -1,48 +1,99 @@
 Game Server in Node
 ===================
 
-This is a server I've created in the interest of having a client server model for any game. The idea is that the game would be a seperate JS file which is loaded in as the game that the user wants to play but that the management system would do the rest. It provides an interface which any application can post to the server.
+My plan is to build a server layer which can act as a RESTFUL interface for any turn based, board game.
+It currently supports the following:
 
-As a demo the first game I've created is a simple X and O game.
+1. 1 or 2 player games
+2. managing up to the amount of games a server can use before it runs out of memory
+3. managing interactions with each of these game using their unique id
+4. A generic move request which takes options for a game specific move
+5. It is a layer between user and game logic, errors are caught but not thrown at server level
 
-I'll run through the different steps and different possibilities:
+Each game file must create a game object (can be named anything you like) with the following defined:
 
-For these example I'll use curl but any application which handles post requests and its params will work fine
+Constructor
+@params
+    board - *a representation of the board in array form*
+    turn - *a single integer value stating who has the starting turn, 0(player1), 1(player2)*
+    player1 - Player 1's name
+    player2 (optional) - Player 2's name(if null will presume its a one player game)
 
-### Initialise Game
+setBoard - a function to change the boards contents
+@params
+    board - *a representation of the board in array form*
 
-    curl -d 'player1=richy&player2=testplayer' http://serveraddress:wherenoderesides/
+getState - a function to return the state of the board in the appropriate format
+@params
+    none
 
-The server then spits out some json with a game_id:
+output:
+    a json object with the following fields
+         board: json representation of the board
+         turn: who's turn it is, (0 or 1)
+         status: A line which reveals the game's state
 
-   { game_id: "5090d29b62366c00a2e261cae5f1f344fa199670" }
+requestMove - a function which the client can affect the internal state of the game
+**note**: This is quite a dangerous function, the user can pass anything in as options and this must be vetted by the game logic. It also must be
+parsed using the game logic. This may change, I have to think about it.
 
-For now this is set to the hash of the two players. The game_id is then used from here on out to control any aspects of the game.
-Its important to note that the server communications should be done client side by other code, and the client side should either have its own game representation or else use the server for everything.
+@params
+	gameid - the current games hash to uniquely identify it
+	options - this is a json object which can be parsed by JSON.parse
 
-### Making a Move
+output:
+	In the default return json object the returncode will be 1 on valid move
+	any error messages will be logged in message.
 
-To make a move in the XO game, we need to request a move, 
+Example game using the server
+=============================
 
-**note:** The concept of a turn in stored in the server model, so when it recieves a message notifying it of a move it assumes that it is from the person's who's turn it is. This may seem badly designed but in fact, if there is client side cooperation using this, the game_id secures it to the two persons while the client side should take a time to wait until its their turn, using long polling or websockets if I make that an option.
+I decided to write a game to show the power of this server.
+When writing a game for this server, the most important part will be the game logic which sits behind the server. This game logic must do a lot, it must provide the above functions in this generic way, while also working out its individuals needs and quirks.
 
-    curl -d 'game_id=5090d29b62366c00a2e261cae5f1f344fa199670&options={"x":0, "y":0}' http://serveraddress:wherenoderesides/
+I made an XO game for example as it seemed easy to write a good XO game which would demonstrate the power.
 
-This will return some similar json with game_id again and the status of the operation
+Heres the commands above abstracted to the server level.
 
-### Getting Board State
+### Creating a game
 
-To check what the board looks like at any stage we do the following
+Lets set up a game between Alice and Bob
 
-    curl -d 'game_id=5090d29b62366c00a2e261cae5f1f344fa199670' http://serveraddress:wherenoderesides/
+    curl -d "player1=alice&player2=bob&type=xo" http://server:port/game
 
-### On Game End
+This will return a json object:
 
-If the game ends or the game is drawn then when the user makes the final move the status will appear as ValidMove and either the winner or else that the match has been drawn
+    {"game_id":"a04fccfeb23e3f28140e8f96b8114de0da732691","status_code":1,"message":"Game Successfully added!"}
 
-### To Do
+### Setting a board
 
-1. Game state after the game is done needs to be looked at, the design is bad.
-2. Need a quick lookup which tells u who's turn and also the state of the game (Won (By whom?) ), Drawn, Open, Invalid)
-3. Add a more generic management system, currently, its not directly game pluggable. A game object is needed which can be inherited from and played directly regardless of the game.
-4. Lots More
+Perhaps we want to set up the board so that it we are midway through a game
+
+   curl -d 'game_id=a04fccfeb23e3f28140e8f96b8114de0da732691&board=[["1", "1", "-1"], ["0", "0", "-1"] , ["1", "0", "-1"]]' http://server:port/change
+
+Responds with a json object
+
+   {"game_id":"a04fccfeb23e3f28140e8f96b8114de0da732691","status_code":1,"message":"Board change successful"}
+
+### Getting the state of the game
+
+This will be different depending on the game logic you are modelling but let me demonstrate how it works in my game.
+
+    curl -d 'game_id=a04fccfeb23e3f28140e8f96b8114de0da732691' http://richydelaney.com:8001/
+
+Responds with the default return json object along with some other valuable additions
+
+   {"game_id":"a04fccfeb23e3f28140e8f96b8114de0da732691","status_code":1,"message":"Retrieved state.","state":{"board":"[[\"X\",\"X\",\"-\"],[\"O\",\"O\",\"-\"],[\"X\",\"O\",\"-\"]]","turn":0,"status":"Running"}}
+
+### Making a move
+
+This is the area where most damage can be done and its the one I'm least happy with, as the server should support all game logic, it makes no sense for the server to do a check on the game so all checks on the JSON object needs to be done. Lets do a demo request:
+
+    curl -d 'game_id=a04fccfeb23e3f28140e8f96b8114de0da732691&options={"x":0, "y":2}' http://richydelaney.com:8001/move
+
+Responds (on a valid move with)
+
+    {"game_id":"a04fccfeb23e3f28140e8f96b8114de0da732691","status_code":1,"message":"Valid Move"}
+
+
+
