@@ -15,7 +15,7 @@ app.use(express.bodyParser());
  *	follow these 3 basic rules
  */
 
-/*	Add is the only excepton in that it replaces the game_id with
+/*	Add is an excepton in that it replaces the game_id with
  *	a player_id object
  */
 app.post("/add", function(req, res) {
@@ -43,7 +43,36 @@ app.post("/add", function(req, res) {
 		}
 		res.send({player_id:player_id, status_code:status_code, message:message});
 });
+/*	Lounge lists the current players in the lounge
+ *	It replaces the default game_id field with a json object which gives information
+ *	for each of the players in the game.
+ *	Takes the players player id so it doesn't return that user
+ */
+app.post("/lounge", function(req, res) {
+	res.header('Access-Control-Allow-Origin', '*');
 
+	var params = req.body;
+	var players_object = null,
+		status_code = 0,
+			message = "";
+	if(params) {
+		if(params.player_id) {
+			try{
+				var list = gamesmaster.list(params.player_id);
+				players_object = JSON.stringify(list);
+				status_code = 1;
+				message = "Player List Generation Successful";
+			}catch(e) {
+				message = "Error generating player list";
+			}
+		}else{
+			message = "Invalid Arguments"
+		}
+	}else{
+		message = "No params are defined"	
+	}
+	res.send({players_object:players_object, status_code:status_code, message:message});
+});
 
 app.post("/game", function(req, res) {
 		res.header('Access-Control-Allow-Origin', '*');

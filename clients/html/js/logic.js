@@ -1,15 +1,75 @@
 $(document).ready(function() {
 
-$('#initButton').click(checkBoard);
+$('#initButton').click(login);
 $("#make_move").click(makeMove);
 
 });
 var player = {
+	player_name:null,
+	player_id:null,
 	game_id:null,
 	turn:0,
 	intervalHandle:null
 };
 
+var login = function() {
+	var name = $("#login_name").val();
+	if(name === "") return false;
+	$.post("http://richydelaney.com:8001/add",
+			{player:name},
+			function(response) {
+				if(response){	
+					if(response.status_code ===1){
+						if(response.player_id){
+							player.player_name = name;
+							player.player_id= response.player_id;
+							list(response.player_id);					
+						}else{
+							throw "InvalidPlayerId";
+						}
+					}else {
+						alert(response.message);
+					}
+				}else{
+					throw "ErrorWithAdd"
+				}
+			},"json");
+};
+
+var list = function(player_id) {
+	$.post("http://richydelaney.com:8001/lounge",
+			{player_id:player_id},
+			function(response) {
+				if(response) {	
+					if(response.status_code ===1){
+						if(response.players_object) {
+							var player_list = JSON.parse(response.players_object);
+							$("#list").html(list_table(player_list));
+						}
+					}else{
+						alert(response.message);
+					}
+				}else {
+					throw "ErrorWithList"
+				}
+			},"json");
+};
+
+var list_table = function(player_list) {
+	if(player_list) {
+		var table = "<table><tbody>";
+		table += "<tr><td>Player Name</td><td>Player ID</td><td>Player Status</td></tr>";
+		$.each(player_list, function(i) {
+				var x = player_list[i];
+				table += "<tr><td>"+x.player_name+"</td><td>"+x.player_id+"</td><td>"+x.playing+"</td></tr>";
+			});
+		table += "</tbody></table>";
+		return table;
+	}else{
+		throw "UghPlayerListError"
+	}
+
+};
 
 var checkBoard = function() {
 		player.game_id = $("#game_id").val();

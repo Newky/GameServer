@@ -34,6 +34,18 @@ Manager.prototype.login = function(player_name) {
 	}
 };
 
+Manager.prototype.list = function(player_id){	
+	return (this.players
+		.filter(function(x) { return (!(x.player_id === player_id)); })
+		.map(function(x) {
+			return {
+				"player_name": x.player_name,
+				"player_id": x.player_id,
+				"playing": x.playing
+			}		
+		}));
+};
+
 Manager.prototype.addGame = function(player1, player2, game) {
 	var hash = sha1_hash(player1+player2);
 
@@ -94,6 +106,7 @@ Manager.prototype.requestMove = function(game_id, options) {
 var Player = function(player_name, player_number) {
 	this.player_number = player_name;
 	this.player_id = sha1_hash(player_name +""+ player_number);
+	this.player_name = player_name;
 	this.playing = false;
 	this.games = [];
 };
