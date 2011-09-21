@@ -16,6 +16,7 @@ app.use(express.bodyParser());
  */
 
 app.post("/game", function(req, res) {
+		res.header('Access-Control-Allow-Origin', '*');
 		var params = req.body
 		
 		var game_id = null,
@@ -91,6 +92,7 @@ app.post("/change", function(req, res) {
  */
 
 app.post("/current", function(req, res) {
+		res.header('Access-Control-Allow-Origin', '*');
 		var params = req.body
 
 		var game_id = null,
@@ -125,7 +127,7 @@ app.post("/current", function(req, res) {
 });
 
 app.post("/move", function(req, res) {
-
+		res.header('Access-Control-Allow-Origin', '*');
 		var params = req.body
 
 		var game_id = null,

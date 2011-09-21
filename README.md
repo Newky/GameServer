@@ -88,7 +88,7 @@ Responds with a json object
 
 This will be different depending on the game logic you are modelling but let me demonstrate how it works in my game.
 
-    curl -d 'game_id=a04fccfeb23e3f28140e8f96b8114de0da732691' http://richydelaney.com:8001/
+    curl -d 'game_id=a04fccfeb23e3f28140e8f96b8114de0da732691' http://richydelaney.com:8001/current
 
 Responds with the default return json object along with some other valuable additions
 
