@@ -15,6 +15,36 @@ app.use(express.bodyParser());
  *	follow these 3 basic rules
  */
 
+/*	Add is the only excepton in that it replaces the game_id with
+ *	a player_id object
+ */
+app.post("/add", function(req, res) {
+		res.header('Access-Control-Allow-Origin', '*');
+		var params = req.body
+		
+		var player_id = null,
+			status_code = 0,
+				message = "";
+				
+		if(params) {
+			if(params.player){
+				try{
+					var player_id =gamesmaster.login(params.player);
+					status_code = 1;
+					message = "Player "+params.player+" created successfully.";
+				}catch(e) {
+					message = "Error creating Player!";
+				}
+			}else{
+				message = "Invalid Arguments!"
+			}
+		}else{
+			message = "No params are defined"	
+		}
+		res.send({player_id:player_id, status_code:status_code, message:message});
+});
+
+
 app.post("/game", function(req, res) {
 		res.header('Access-Control-Allow-Origin', '*');
 		var params = req.body

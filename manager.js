@@ -3,7 +3,7 @@ var xo = require("./xo.js").xo;
 
 function Manager() {
 	this.games = {};
-
+	this.players = [];
 	this.types = {
 		"xo": xo
 	};
@@ -20,6 +20,18 @@ Manager.prototype.addType = function(label, obj) {
 		if(typeof temp[checks[i]] !== "function")
 			throw "FailedSchemaCheck";	
 	this.types[label] = obj;
+};
+
+Manager.prototype.login = function(player_name) {
+	if(!player_name){
+		throw "NoNameSpecified";
+	}else{
+		var index = this.players.length;
+		this.players.push(
+				new Player(player_name, index)
+				);	
+		return this.players[this.players.length-1].player_id;
+	}
 };
 
 Manager.prototype.addGame = function(player1, player2, game) {
@@ -76,6 +88,14 @@ Manager.prototype.requestMove = function(game_id, options) {
 	}else{
 		return 0;
 	}
+};
+
+
+var Player = function(player_name, player_number) {
+	this.player_number = player_name;
+	this.player_id = sha1_hash(player_name +""+ player_number);
+	this.playing = false;
+	this.games = [];
 };
 
 exports.Manager = Manager;
