@@ -90,7 +90,7 @@ app.post("/request", function(req, res) {
 					status_code = 1;
 					message = "Game created, waiting on opposition.";
 				}catch(e) {
-					message ="Some Problem requesting a game";
+					message ="Some Problem requesting a game "+e;
 				}
 			}else {
 				message = "Invalid Arguments"
@@ -115,7 +115,7 @@ app.post("/accept", function(req, res) {
 				status_code = 1;
 				message = "Accepted game successfully";
 			}catch(e) {
-				message = "Some problem with accepting game";
+				message = "Some problem with accepting game"+e;
 			}
 		}else{
 			message = "Invalid Arguments"
@@ -142,6 +142,7 @@ app.post("/playercurrent", function(req, res) {
 						gamesmaster.playerState(params.player_id)
 						);
 					status_code = 1;
+					player_id = params.player_id;
 					message = "Player state returned.";
 				}catch(e) {
 					message ="Error getting players state";

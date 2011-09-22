@@ -18,6 +18,8 @@ Manager.prototype.accept = function(player_id, game_id) {
 		}else{
 			var opp_id;
 			 _players[0].requestsIncoming = _players[0].requestsIncoming.filter(function(x) {
+						console.log(x);
+						console.log(game_id);
 						if(x.game_id === game_id) {
 							opp_id = x.player;
 							return false;
@@ -25,6 +27,7 @@ Manager.prototype.accept = function(player_id, game_id) {
 							return true;
 						}
 					});
+			console.log(opp_id);
 			var _players = this.players.filter(function(x) { return (x.player_id === opp_id); });
 			if(_players.length <= 0) {
 				throw "Unknown Opposition";

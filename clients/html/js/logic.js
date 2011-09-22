@@ -3,11 +3,17 @@ $(document).ready(function() {
 $('#initButton').click(login);
 $("#make_move").click(makeMove);
 $("#selectPlay").live("click",makeGame);
+$("#accept").live("click",accept);
 
 
 
+playerTicker = setInterval(checkPlayerState, 5000);
 
 });
+
+var playerTicker; 
+
+
 var player = {
 	game:"xo",
 	player_name:null,
@@ -61,7 +67,7 @@ var makeGame = function() {
 				}
 			}, "json");
 				
-}
+};
 
 var list = function(player_id) {
 	$.post("http://richydelaney.com:8001/lounge",
@@ -110,6 +116,59 @@ var list_table = function(player_list) {
 		throw "UghPlayerListError"
 	}
 };
+
+var accept = function(event) {
+	var game_id =  player.game_id;
+	console.log(game_id);
+	console.log(player.player_id);
+	$.post("http://richydelaney.com:8001/accept",
+				{player_id: player.player_id,
+				 game_id: game_id},
+				 function(response) {
+					if(response){
+						if(response.status_code === 1){
+							clearInterval(playerTicker);
+							player.turn = 1;
+							checkBoard();
+							wait();
+							user_notice("");
+						}else{
+							throw "CouldNotAcceptGame";
+						}
+					}else{
+						alert(response.message);
+					}
+				 },"json");
+}
+
+var checkPlayerState = function() {
+	$.post("http://richydelaney.com:8001/playercurrent",
+			{player_id: player.player_id},
+			function(response) {
+				if(response) {
+					if(response.status_code === 1){
+						var state = (JSON.parse(response.state))[0];
+						if(state){
+							if(state.incoming.length >= 1) {
+								for(var i=0;i<state.incoming.length;i++){
+									var game = state.incoming[i];
+									player.game_id = game.game_id;
+									var str ="<p>"+game.player+" has requested a game.<p>"
+									str += "<button id='accept'>Accept</button>"
+									user_notice(
+										str
+										);
+								}
+							}
+						}
+					}else{
+						alert(response.message);
+					}
+				}else{
+					throw "UghPlayerStateError"
+				}
+			},"json");
+}
 
 var checkBoard = function() {
 	/*player.game_id = $("#game_id").val();*/
@@ -172,6 +231,10 @@ var getState = function() {
 var turnCheck = function() {
 	getState(function(response) {
 		if(response.state){
+			if(response.state.status.toLowerCase()!=="running"){
+				user_notice(response.state.status);
+				//End Game Code Here
+			}
 			var turn = response.state.turn;
 			console.log("Turn:"+turn+" PlayerTurn:"+player.turn);
 			if(turn === player.turn){
@@ -200,4 +263,10 @@ var prettyPrintBoard = function(board) {
 		throw "InvalidBoardError";
 	}
 }
+
+var user_notice = function(str) {
+	$("#message_board").html(
+			str
+		);
+};
 
