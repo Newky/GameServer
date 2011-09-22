@@ -2,9 +2,14 @@ $(document).ready(function() {
 
 $('#initButton').click(login);
 $("#make_move").click(makeMove);
+$("#selectPlay").live("click",makeGame);
+
+
+
 
 });
 var player = {
+	game:"xo",
 	player_name:null,
 	player_id:null,
 	game_id:null,
@@ -36,6 +41,28 @@ var login = function() {
 			},"json");
 };
 
+var makeGame = function() {
+	var opp_id = $("#players_list").val();
+	$.post("http://richydelaney.com:8001/request",
+			{
+				player_id:player.player_id, 
+				opp_id:opp_id,
+				type:player.game
+			},function(response) {
+				if(response) {
+					if(response.status_code ===1){
+						player.game_id = response.game_id;
+						checkBoard();
+					}else{
+						alert(response.message);
+					}
+				}else{
+					throw "ErrorWithMakingGame"
+				}
+			}, "json");
+				
+}
+
 var list = function(player_id) {
 	$.post("http://richydelaney.com:8001/lounge",
 			{player_id:player_id},
@@ -44,7 +71,7 @@ var list = function(player_id) {
 					if(response.status_code ===1){
 						if(response.players_object) {
 							var player_list = JSON.parse(response.players_object);
-							$("#list").html(list_table(player_list));
+							$("#list").html(list_select(player_list));
 						}
 					}else{
 						alert(response.message);
@@ -53,6 +80,20 @@ var list = function(player_id) {
 					throw "ErrorWithList"
 				}
 			},"json");
+};
+
+var list_select = function(player_list) {
+	if(player_list) {
+		var select= "<select id='players_list'>";
+		$.each(player_list, function(i) {
+				var x = player_list[i];
+				select += "<option value='"+x.player_id+"'>"+x.player_name+"</option>";
+			});
+		select+= "</select><button id='selectPlay'>Play!</button>";
+		return select;
+	}else{
+		throw "UghPlayerListError"
+	}
 };
 
 var list_table = function(player_list) {
@@ -71,7 +112,7 @@ var list_table = function(player_list) {
 };
 
 var checkBoard = function() {
-		player.game_id = $("#game_id").val();
+	/*player.game_id = $("#game_id").val();*/
 		$.post("http://richydelaney.com:8001/current",
 			{game_id:player.game_id},
 			function(response) {
@@ -90,7 +131,6 @@ var checkBoard = function() {
 
 		
 var makeMove = function() {
-	player.game_id = $("#game_id").val();
 	var options = JSON.stringify({
 					"x": $("#x").val(),
 					"y": $("#y").val()
@@ -113,7 +153,6 @@ var wait = function() {
 }
 
 var getState = function() {
-		player.game_id = $("#game_id").val();
 		var args = arguments;
 		$.post("http://richydelaney.com:8001/current",
 			{game_id:player.game_id},
