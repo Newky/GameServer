@@ -43,6 +43,7 @@ app.post("/add", function(req, res) {
 		}
 		res.send({player_id:player_id, status_code:status_code, message:message});
 });
+
 /*	Lounge lists the current players in the lounge
  *	It replaces the default game_id field with a json object which gives information
  *	for each of the players in the game.
@@ -72,6 +73,61 @@ app.post("/lounge", function(req, res) {
 		message = "No params are defined"	
 	}
 	res.send({players_object:players_object, status_code:status_code, message:message});
+});
+
+app.post("/request", function(req, res) {
+		res.header('Access-Control-Allow-Origin', '*');
+		var params = req.body
+		
+		var game_id = null,
+			status_code = 0,
+				message = "";
+		
+		if(params) {
+			if(params.player_id && params.opp_id && params.type) {
+				try{
+					game_id = gamesmaster.addGameMulti(params.player_id, params.opp_id, params.type);
+					status_code = 1;
+					message = "Game created, waiting on opposition.";
+				}catch(e) {
+					message ="Some Problem requesting a game";
+				}
+			}else {
+				message = "Invalid Arguments"
+			}
+		}else{
+			message = "No params are defined"	
+		}
+		res.send({game_id:game_id, status_code:status_code, message:message});
+});
+
+app.post("/playercurrent", function(req, res) {
+		res.header('Access-Control-Allow-Origin', '*');
+		var params = req.body
+		
+		var player_id = null,
+			status_code = 0,
+				message = "",
+					state = null;
+		
+		if(params) {
+			if(params.player_id) {	
+				try{
+					state = JSON.stringify(
+						gamesmaster.playerState(params.player_id)
+						);
+					status_code = 1;
+					message = "Player state returned.";
+				}catch(e) {
+					message ="Error getting players state";
+				}
+			}else{
+				message = "Invalid Arguments"
+			}
+		}else{
+			message = "No params are defined"	
+		}
+		res.send({player_id:player_id, status_code:status_code, message:message,state:state });
 });
 
 app.post("/game", function(req, res) {

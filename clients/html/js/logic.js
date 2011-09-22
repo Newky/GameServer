@@ -68,7 +68,6 @@ var list_table = function(player_list) {
 	}else{
 		throw "UghPlayerListError"
 	}
-
 };
 
 var checkBoard = function() {

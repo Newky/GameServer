@@ -1,5 +1,6 @@
 var sha1_hash = require("./hash.js").sha1_hash;
 var xo = require("./xo.js").xo;
+var Player = require("./player.js").Player;
 
 function Manager() {
 	this.games = {};
@@ -27,10 +28,11 @@ Manager.prototype.login = function(player_name) {
 		throw "NoNameSpecified";
 	}else{
 		var index = this.players.length;
+		console.log(index);
 		this.players.push(
 				new Player(player_name, index)
 				);	
-		return this.players[this.players.length-1].player_id;
+		return(this.players[this.players.length-1].player_id);
 	}
 };
 
@@ -46,8 +48,20 @@ Manager.prototype.list = function(player_id){
 		}));
 };
 
+Manager.prototype.playerState = function(player_id) {
+	return (this.players
+		.filter(function(x) { return ((x.player_id === player_id)); })
+		.map(function(x) {
+			return {
+				"games":x.games,
+				"pending":x.requestsPending,
+				"incoming":x.requestsIncoming
+			}
+		}));
+};
+
 Manager.prototype.addGame = function(player1, player2, game) {
-	var hash = sha1_hash(player1+player2);
+	var hash = sha1_hash(player1+player2+game);
 
 	if (!game) {
 		throw "NoGameSpecified";
@@ -64,6 +78,28 @@ Manager.prototype.addGame = function(player1, player2, game) {
 		}
 	}
 };
+
+
+Manager.prototype.addGameMulti = function(player1, player2, game) {
+	if(!(player1 && player2 && game))
+		throw "addGameCalledIncorrectly"
+	var _players = this.players
+		.filter(function(x) { return ((x.player_id === player2 || x.player_id === player1)); });
+	if(_players.length <2){
+		throw "Invalid Players"
+	}else{
+		var game_id = this.addGame(_players[0].player_name,_players[1].player_name, game);
+		_players.map(function(x) {
+				if(x.player_id === player1){
+					x.requestsPending.push(game_id);
+				}else{
+					x.requestsIncoming.push(game_id);
+				}
+		});
+		return game_id;
+	}
+};
+
 
 Manager.prototype.changeBoard = function(game_id, board) {
 	if(game_id && board) {
@@ -102,13 +138,5 @@ Manager.prototype.requestMove = function(game_id, options) {
 	}
 };
 
-
-var Player = function(player_name, player_number) {
-	this.player_number = player_name;
-	this.player_id = sha1_hash(player_name +""+ player_number);
-	this.player_name = player_name;
-	this.playing = false;
-	this.games = [];
-};
 
 exports.Manager = Manager;
