@@ -101,6 +101,31 @@ app.post("/request", function(req, res) {
 		res.send({game_id:game_id, status_code:status_code, message:message});
 });
 
+app.post("/accept", function(req, res) {
+	res.header('Access-Control-Allow-Origin', '*');
+	var params = req.body
+
+	var game_id = null,
+		status_code = 0,
+			message = "";
+	if(params){
+		if(params.player_id && params.game_id) {
+			try{
+				game_id = gamesmaster.accept(params.player_id, params.game_id);
+				status_code = 1;
+				message = "Accepted game successfully";
+			}catch(e) {
+				message = "Some problem with accepting game";
+			}
+		}else{
+			message = "Invalid Arguments"
+		}
+	}else{
+		message = "No params are defined"	
+	}
+	res.send({game_id:game_id, status_code:status_code, message:message});	
+});
+
 app.post("/playercurrent", function(req, res) {
 		res.header('Access-Control-Allow-Origin', '*');
 		var params = req.body
